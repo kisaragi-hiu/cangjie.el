@@ -15,9 +15,10 @@ Or use [`straight.el`](https://github.com/raxod502/straight.el):
 
 ## Use
 
-There is no interactive function yet, because I don't know how to do that.
+Do <kbd>M-x</kbd> `cangjie`, then enter the Han character in the prompt.
+The result will be `message`d out.
 
-For now, just write `(cangjie "字")` somewhere in a buffer and <kbd>M-x</kbd> `eval-last-sexp` on it.
+When called non-interactively, take the character as the argument, and return the Cangjie code.
 
 # Naming
 

@@ -97,28 +97,32 @@ Grab lines from FILE containing S."
 ;;;###autoload
 (defun cangjie (han)
   "Retrieve Cangjie code for the HAN character."
-  (cond ((cangjie--valid-rime-dict? cangjie-source)
-         ;; take cangjie encoding from RIME dictionary
-         (->> (cangjie--grep-line cangjie-source han)
-              (--filter (not (s-prefix? "#" it)))
-              (s-join "")
-              (s-split "\t")
-              second
-              cangjie--abc-to-han))
-        ((not cangjie-fallback-just-grep)
-         ;; Try to extract encoding from grep'd wiktionary text
-         (->> (shell-command-to-string
-               (concat "curl --silent https://zh.wiktionary.org/wiki/" han
-                       " | grep 仓颉"))
-              (s-replace-regexp "^.*：" "")
-              s-trim
-              (s-replace-regexp "<.*>$" "")
-              cangjie--abc-to-han))
-        (t
-         ;; Fallback
-         (shell-command-to-string
-          (concat "curl --silent https://zh.wiktionary.org/wiki/" han
-                  " | grep 仓颉")))))
+  (interactive "M漢字：")
+  (let ((result (cond ((cangjie--valid-rime-dict? cangjie-source)
+                       ;; take cangjie encoding from RIME dictionary
+                       (->> (cangjie--grep-line cangjie-source han)
+                            (--filter (not (s-prefix? "#" it)))
+                            (s-join "")
+                            (s-split "\t")
+                            second
+                            cangjie--abc-to-han))
+                      ((not cangjie-fallback-just-grep)
+                       ;; Try to extract encoding from grep'd wiktionary text
+                       (->> (shell-command-to-string
+                             (concat "curl --silent https://zh.wiktionary.org/wiki/" han
+                                     " | grep 仓颉"))
+                            (s-replace-regexp "^.*：" "")
+                            s-trim
+                            (s-replace-regexp "<.*>$" "")
+                            cangjie--abc-to-han))
+                      (t
+                       ;; Fallback
+                       (shell-command-to-string
+                        (concat "curl --silent https://zh.wiktionary.org/wiki/" han
+                                " | grep 仓颉"))))))
+    (when (called-interactively-p 'interactive)
+      (message result))
+    result))
 
 (provide 'cangjie)
 ;;; cangjie.el ends here
