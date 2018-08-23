@@ -66,6 +66,7 @@ Grab lines from FILE containing S."
        (--map (gethash it cangjie--abc-to-han-hash))
        (s-join "")))
 
+;;;###autoload
 (defun cangjie (han)
   "Retrieve Cangjie code for the HAN character."
   (cond ((cangjie--valid-rime-dict? cangjie-source)
