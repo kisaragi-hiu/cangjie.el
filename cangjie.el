@@ -24,6 +24,13 @@
 When this is set to the symbol `wiktionary' or anything that's not a valid path
 to a RIME dictionary, grep the Wiktionary page for the character instead.")
 
+(defvar cangjie-fallback-just-grep nil
+  "Whether to just return the grep'd Wiktionary content or not.
+
+Has no effect when using a RIME dictionary.
+When nil, attempt to format the Wiktionary content.")
+
+
 (defun cangjie--grep (file s)
   "Grep wrapper.
 
@@ -77,7 +84,7 @@ Grab lines from FILE containing S."
               (s-split "\t")
               second
               cangjie--abc-to-han))
-        ((eq cangjie-source 'wiktionary)
+        ((not cangjie-fallback-just-grep)
          ;; Try to extract encoding from grep'd wiktionary text
          (->> (shell-command-to-string
                (concat "curl --silent https://zh.wiktionary.org/wiki/" han
