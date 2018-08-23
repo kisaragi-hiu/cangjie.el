@@ -6,7 +6,7 @@
 
 Put `cangjie.el` under your `load-path`, then `(require 'cangjie)` in your init file.
 
-Or use `[straight.el](https://github.com/raxod502/straight.el)`:
+Or use [`straight.el`](https://github.com/raxod502/straight.el):
 
 ```elisp
 (straight-use-package '(cangjie.el :type git :host github
