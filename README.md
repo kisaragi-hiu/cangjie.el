@@ -12,3 +12,9 @@ Or use [`straight.el`](https://github.com/raxod502/straight.el):
 (straight-use-package '(cangjie.el :type git :host github
                                    :repo "kisaragi-hiu/cangjie.el"))
 ```
+
+## Use
+
+There is no interactive function yet, because I don't know how to do that.
+
+For now, just write `(cangjie "字")` somewhere in a buffer and <kbd>M-x</kbd> `eval-last-sexp` on it.
