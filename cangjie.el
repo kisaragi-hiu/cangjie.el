@@ -4,7 +4,7 @@
 ;; URL: https://gitlab.com/kisaragi-hiu/cangjie.el
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "24") (s "1.12.0") (dash "2.14.1"))
-;; Keywords: cangjie, lookup, writing, education
+;; Keywords: convenience, writing
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -33,6 +33,11 @@
 (require 's)
 (require 'dash)
 
+(defgroup cangjie nil
+  "Lookup Cangjie code from a RIME dictionary or Wiktionary."
+  :group 'convenience
+  :prefix "cangjie-")
+
 ;; TODO: I don't know how to use defcustom.
 (defvar cangjie-source "/usr/share/rime-data/cangjie5.dict.yaml"
   "RIME dictionary to lookup the character's code in.
@@ -40,11 +45,11 @@
 When this is set to the symbol `wiktionary' or anything that's not a valid path
 to a RIME dictionary, grep the Wiktionary page for the character instead.")
 
-(defvar cangjie-fallback-just-grep nil
+(defcustom cangjie-fallback-just-grep nil
   "Whether to just return the grep'd Wiktionary content or not.
-
 Has no effect when using a RIME dictionary.
-When nil, attempt to format the Wiktionary content.")
+When nil, attempt to format the Wiktionary content."
+  :type 'boolean)
 
 
 (defun cangjie--grep (file s)
