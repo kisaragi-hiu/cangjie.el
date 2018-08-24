@@ -38,12 +38,16 @@
   :group 'convenience
   :prefix "cangjie-")
 
-;; TODO: I don't know how to use defcustom.
+;; TODO: I don't know how to use defcustom for this one….
 (defvar cangjie-source "/usr/share/rime-data/cangjie5.dict.yaml"
   "RIME dictionary to lookup the character's code in.
 
-When this is set to the symbol `wiktionary' or anything that's not a valid path
-to a RIME dictionary, grep the Wiktionary page for the character instead.")
+Its value can be:
+
+- a path,
+  which makes `cangjie' read from that path if it's a valid RIME dictionary.
+- `wiktionary', or anything that's not a valid path,
+  which makes `cangjie' grep the Wiktionary page for the character.")
 
 (defcustom cangjie-fallback-just-grep nil
   "Whether to just return the grep'd Wiktionary content or not.
