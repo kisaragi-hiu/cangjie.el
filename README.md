@@ -20,9 +20,11 @@ The result will be `message`d out.
 
 When called non-interactively, take the character as the argument, and return the Cangjie code.
 
-# Thanks
+# Credits
 
 This is the first standalone Emacs package I've written, so I needed some directions.
 [emacs-powerthesaurus](https://github.com/SavchenkoValeriy/emacs-powerthesaurus) and
 [`define-word`](https://github.com/abo-abo/define-word) served as really good references
-for me to follow, and I want to thank them here.
+for me to follow.
+
+I'm using the Cangjie dictionary from [RIME](//rime.im), [`rime-cangjie`](https://github.com/rime/rime-cangjie).

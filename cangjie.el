@@ -39,7 +39,7 @@
   :prefix "cangjie-")
 
 ;; TODO: I don't know how to use defcustom for this one….
-(defvar cangjie-source "/usr/share/rime-data/cangjie5.dict.yaml"
+(defvar cangjie-source "cangjie5.dict.yaml"
   "RIME dictionary to lookup the character's code in.
 
 Its value can be:
@@ -47,7 +47,9 @@ Its value can be:
 - a path,
   which makes `cangjie' read from that path if it's a valid RIME dictionary.
 - `wiktionary', or anything that's not a valid path,
-  which makes `cangjie' grep the Wiktionary page for the character.")
+  which makes `cangjie' grep the Wiktionary page for the character.
+
+By default, cangjie.el uses the bundled RIME cangjie dictionary.")
 
 (defcustom cangjie-fallback-just-grep nil
   "Whether to just return the grep'd Wiktionary content or not.
