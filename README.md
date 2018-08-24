@@ -20,11 +20,6 @@ The result will be `message`d out.
 
 When called non-interactively, take the character as the argument, and return the Cangjie code.
 
-# Naming
-
-Calling this `cangjie.el` has the potential of being confused with an actual Cangjie input method in Emacs.
-If that ends up being the case, this will be renamed to `cangjie-lookup.el`.
-
 # Thanks
 
 This is the first standalone Emacs package I've written, so I needed some directions.
