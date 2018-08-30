@@ -134,7 +134,11 @@ Grab lines from FILE containing S."
 (defun cangjie-at-point ()
   "Run `cangjie' at point."
   (interactive)
-  (cangjie (string (char-after))))
+  (let ((result
+         (cangjie (string (char-after)))))
+    (when (called-interactively-p 'interactive)
+      (message result))
+    result))
 
 (provide 'cangjie)
 ;;; cangjie.el ends here
