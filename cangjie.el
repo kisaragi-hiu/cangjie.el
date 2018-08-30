@@ -130,5 +130,11 @@ Grab lines from FILE containing S."
       (message result))
     result))
 
+;;;###autoload
+(defun cangjie-at-point ()
+  "Run `cangjie' at point."
+  (interactive)
+  (cangjie (string (char-after))))
+
 (provide 'cangjie)
 ;;; cangjie.el ends here
