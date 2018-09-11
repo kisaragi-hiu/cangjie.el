@@ -2,8 +2,8 @@
 
 ;; Authors: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; URL: https://github.com/kisaragi-hiu/cangjie.el
-;; Version: 0.2.0
-;; Package-Requires: ((emacs "24") (s "1.12.0") (dash "2.14.1"))
+;; Version: 0.3.0
+;; Package-Requires: ((emacs "24") (s "1.12.0") (dash "2.14.1") (f "0.2.0"))
 ;; Keywords: convenience, writing
 
 ;; This file is NOT part of GNU Emacs.
@@ -31,6 +31,7 @@
 ;;; Code:
 
 (require 's)
+(require 'f)
 (require 'dash)
 
 (defgroup cangjie nil
@@ -39,14 +40,17 @@
   :prefix "cangjie-")
 
 ;; TODO: I don't know how to use defcustom for this one….
-(defvar cangjie-source "cangjie5.dict.yaml"
+(defvar cangjie-source 'rime
   "RIME dictionary to lookup the character's code in.
 
 Its value can be:
 
 - a path,
   which makes `cangjie' read from that path if it's a valid RIME dictionary.
-- `wiktionary', or anything that's not a valid path,
+- `rime',
+  to download the dictionary from URL `https://github.com/rime/rime-cangjie',
+  and save it for future use.
+- `wiktionary', or anything else that's not a valid path,
   which makes `cangjie' grep the Wiktionary page for the character.
 
 By default, cangjie.el uses the bundled RIME cangjie dictionary.")
@@ -77,7 +81,7 @@ Grab lines from FILE containing S."
 (defun cangjie--valid-rime-dict? (val)
   "Check if VAL is a path to a valid RIME dictionary."
   (and (stringp val)
-       (file-exists-p val)
+       (f-exists? val)
        (s-suffix? ".yaml" val)
        (cangjie--file-contains? val "name:")
        (cangjie--file-contains? val "use_preset_vocabulary:")))
@@ -104,28 +108,47 @@ Grab lines from FILE containing S."
 (defun cangjie (character)
   "Retrieve Cangjie code for the han CHARACTER."
   (interactive "M漢字：")
-  (let ((result (cond ((cangjie--valid-rime-dict? cangjie-source)
-                       ;; take cangjie encoding from RIME dictionary
-                       (->> (cangjie--grep-line cangjie-source character)
-                            (--filter (not (s-prefix? "#" it)))
-                            (s-join "")
-                            (s-split "\t")
-                            second
-                            cangjie--abc-to-han))
-                      ((not cangjie-fallback-just-grep)
-                       ;; Try to extract encoding from grep'd wiktionary text
-                       (->> (shell-command-to-string
-                             (concat "curl --silent https://zh.wiktionary.org/wiki/" character
-                                     " | grep 仓颉"))
-                            (s-replace-regexp "^.*：" "")
-                            s-trim
-                            (s-replace-regexp "<.*>$" "")
-                            cangjie--abc-to-han))
-                      (t
-                       ;; Fallback
-                       (shell-command-to-string
-                        (concat "curl --silent https://zh.wiktionary.org/wiki/" character
-                                " | grep 仓颉"))))))
+  (let ((result
+         (cond ((eq cangjie-source 'rime)
+                (let ((downloaded-rime-dict-path (f-join user-emacs-directory "cangjie5.dict.yaml")))
+                  (if (cangjie--valid-rime-dict? downloaded-rime-dict-path)
+                      (let ((cangjie-source downloaded-rime-dict-path))
+                        ;; this binding should be available in here
+                        (cangjie character))
+                    ;; download the dictionary when it's not there
+                    (shell-command-to-string
+                     (concat
+                      "curl --silent "
+                      "https://raw.githubusercontent.com/rime/rime-cangjie/master/cangjie5.dict.yaml"
+                      " > "
+                      downloaded-rime-dict-path))
+                    (let ((cangjie-source downloaded-rime-dict-path))
+                      (cangjie character)))))
+
+               ((cangjie--valid-rime-dict? cangjie-source)
+                ;; take cangjie encoding from RIME dictionary
+                (->> (cangjie--grep-line cangjie-source character)
+                     (--filter (not (s-prefix? "#" it)))
+                     (s-join "")
+                     (s-split "\t")
+                     second
+                     cangjie--abc-to-han))
+
+               ((not cangjie-fallback-just-grep)
+                ;; Try to extract encoding from grep'd wiktionary text
+                (->> (shell-command-to-string
+                      (concat "curl --silent https://zh.wiktionary.org/wiki/" character
+                              " | grep 仓颉"))
+                     (s-replace-regexp "^.*：" "")
+                     s-trim
+                     (s-replace-regexp "<.*>$" "")
+                     cangjie--abc-to-han))
+
+               (t
+                ;; Fallback
+                (shell-command-to-string
+                 (concat "curl --silent https://zh.wiktionary.org/wiki/" character
+                         " | grep 仓颉"))))))
     (when (called-interactively-p 'interactive)
       (message result))
     result))
