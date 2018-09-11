@@ -2,7 +2,7 @@
 
 ;; Authors: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; URL: https://github.com/kisaragi-hiu/cangjie.el
-;; Version: 0.3.0
+;; Version: 0.3.1
 ;; Package-Requires: ((emacs "24") (s "1.12.0") (dash "2.14.1") (f "0.2.0"))
 ;; Keywords: convenience, writing
 
@@ -50,16 +50,13 @@ Its value can be:
 - `rime',
   to download the dictionary from URL `https://github.com/rime/rime-cangjie',
   and save it for future use.
-- `wiktionary', or anything else that's not a valid path,
-  which makes `cangjie' grep the Wiktionary page for the character.
+- `wiktionary-raw',
+  to do a simple `curl wiktionary.org/wiki/char | grep`.
+- `wiktionary', or anything else,
+  to grep the Wiktionary page like `wiktionary-raw', then try to remove the
+  markup in the result, leaving just the Cangjie code.
 
-By default, cangjie.el uses the bundled RIME cangjie dictionary.")
-
-(defcustom cangjie-fallback-just-grep nil
-  "Whether to just return the grep'd Wiktionary content or not.
-Has no effect when using a RIME dictionary.
-When nil, attempt to format the Wiktionary content."
-  :type 'boolean)
+Set to `rime' by default, so the dictionary will be downloaded on first use.")
 
 
 (defun cangjie--grep (file s)
@@ -134,7 +131,12 @@ Grab lines from FILE containing S."
                      second
                      cangjie--abc-to-han))
 
-               ((not cangjie-fallback-just-grep)
+               ((eq cangjie-source 'wiktionary-raw)
+                (shell-command-to-string
+                 (concat "curl --silent https://zh.wiktionary.org/wiki/" character
+                         " | grep 仓颉")))
+
+               (t
                 ;; Try to extract encoding from grep'd wiktionary text
                 (->> (shell-command-to-string
                       (concat "curl --silent https://zh.wiktionary.org/wiki/" character
@@ -142,13 +144,8 @@ Grab lines from FILE containing S."
                      (s-replace-regexp "^.*：" "")
                      s-trim
                      (s-replace-regexp "<.*>$" "")
-                     cangjie--abc-to-han))
+                     cangjie--abc-to-han)))))
 
-               (t
-                ;; Fallback
-                (shell-command-to-string
-                 (concat "curl --silent https://zh.wiktionary.org/wiki/" character
-                         " | grep 仓颉"))))))
     (when (called-interactively-p 'interactive)
       (message result))
     result))
