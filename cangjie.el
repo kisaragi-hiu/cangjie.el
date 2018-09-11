@@ -101,12 +101,12 @@ Grab lines from FILE containing S."
        (s-join "")))
 
 ;;;###autoload
-(defun cangjie (han)
-  "Retrieve Cangjie code for the HAN character."
+(defun cangjie (character)
+  "Retrieve Cangjie code for the han CHARACTER."
   (interactive "M漢字：")
   (let ((result (cond ((cangjie--valid-rime-dict? cangjie-source)
                        ;; take cangjie encoding from RIME dictionary
-                       (->> (cangjie--grep-line cangjie-source han)
+                       (->> (cangjie--grep-line cangjie-source character)
                             (--filter (not (s-prefix? "#" it)))
                             (s-join "")
                             (s-split "\t")
@@ -115,7 +115,7 @@ Grab lines from FILE containing S."
                       ((not cangjie-fallback-just-grep)
                        ;; Try to extract encoding from grep'd wiktionary text
                        (->> (shell-command-to-string
-                             (concat "curl --silent https://zh.wiktionary.org/wiki/" han
+                             (concat "curl --silent https://zh.wiktionary.org/wiki/" character
                                      " | grep 仓颉"))
                             (s-replace-regexp "^.*：" "")
                             s-trim
@@ -124,7 +124,7 @@ Grab lines from FILE containing S."
                       (t
                        ;; Fallback
                        (shell-command-to-string
-                        (concat "curl --silent https://zh.wiktionary.org/wiki/" han
+                        (concat "curl --silent https://zh.wiktionary.org/wiki/" character
                                 " | grep 仓颉"))))))
     (when (called-interactively-p 'interactive)
       (message result))
