@@ -2,7 +2,7 @@
 
 ;; Authors: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; URL: https://github.com/kisaragi-hiu/cangjie.el
-;; Version: 0.3.1
+;; Version: 0.3.2
 ;; Package-Requires: ((emacs "24") (s "1.12.0") (dash "2.14.1") (f "0.2.0"))
 ;; Keywords: convenience, writing
 
