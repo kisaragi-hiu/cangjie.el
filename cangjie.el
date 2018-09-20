@@ -19,14 +19,12 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with powerthesaurus.el.
+;; along with cangjie.el.
 ;; If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
 ;; This package is for quick retrieval of Cangjie codes of Han characters.
-;; Setup `cangjie-source' to point to a [RIME](//rime.im) Cangjie dictionary,
-;; or 'wiktionary to grab the code from Wiktionary.
 
 ;;; Code:
 
