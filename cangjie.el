@@ -2,7 +2,7 @@
 
 ;; Authors: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; URL: https://github.com/kisaragi-hiu/cangjie.el
-;; Version: 0.4.3
+;; Version: 0.4.4
 ;; Package-Requires: ((emacs "24") (s "1.12.0") (dash "2.14.1") (f "0.2.0"))
 ;; Keywords: convenience, writing
 
@@ -97,6 +97,14 @@ Grab lines from FILE containing S."
          (--map (gethash it h))
          (s-join ""))))
 
+(defun cangjie--grep-buffer (buffer s)
+  "Return lines in BUFFER matching S as a list."
+  (with-current-buffer buffer
+    (search-forward s)
+    (let ((line-start (progn (beginning-of-line) (point)))
+          (line-end (progn (end-of-line) (point))))
+      (buffer-substring-no-properties line-start line-end))))
+
 ;;;###autoload
 (defun cangjie (character)
   "Retrieve Cangjie code for the han CHARACTER."
@@ -129,19 +137,22 @@ Grab lines from FILE containing S."
                      cangjie--abc-to-han))
 
                ((eq cangjie-source 'wiktionary-raw)
-                (shell-command-to-string
-                 (concat "curl --silent https://zh.wiktionary.org/wiki/" character
-                         " | grep 仓颉")))
+                (cangjie--grep-buffer (url-retrieve-synchronously
+                                       (concat "https://zh.wiktionary.org/wiki/"
+                                               character))
+                                      "仓颉"))
 
                (t
                 ;; Try to extract encoding from grep'd wiktionary text
-                (->> (shell-command-to-string
-                      (concat "curl --silent https://zh.wiktionary.org/wiki/" character
-                              " | grep 仓颉"))
-                     (s-replace-regexp "^.*：" "")
-                     s-trim
-                     (s-replace-regexp "<.*>$" "")
-                     cangjie--abc-to-han)))))
+                (->>
+                 (cangjie--grep-buffer (url-retrieve-synchronously
+                                        (concat "https://zh.wiktionary.org/wiki/"
+                                                character))
+                                       "仓颉")
+                 (s-replace-regexp "^.*：" "")
+                 s-trim
+                 (s-replace-regexp "<.*>$" "")
+                 cangjie--abc-to-han)))))
 
     (when (called-interactively-p 'interactive)
       (message result))
