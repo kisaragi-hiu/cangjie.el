@@ -2,7 +2,7 @@
 
 ;; Authors: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; URL: https://github.com/kisaragi-hiu/cangjie.el
-;; Version: 0.4.4
+;; Version: 0.5.0
 ;; Package-Requires: ((emacs "24") (s "1.12.0") (dash "2.14.1") (f "0.2.0"))
 ;; Keywords: convenience, writing
 
@@ -58,21 +58,23 @@ Its value can be:
 Set to `rime' by default, so the dictionary will be downloaded on first use.")
 
 
-(defun cangjie--grep (file s)
-  "Grep wrapper.
+(defun cangjie--grep-buffer (buffer s)
+  "Return lines in BUFFER matching S as a list."
+  (with-current-buffer buffer
+    (search-forward s)
+    (let ((line-start (progn (beginning-of-line) (point)))
+          (line-end (progn (end-of-line) (point))))
+      (buffer-substring-no-properties line-start line-end))))
 
-Grab lines from FILE containing S."
-  (shell-command-to-string (concat "grep " s " " file)))
-
-(defun cangjie--grep-line (file s)
+(defun cangjie--grep-file (file s)
   "Grab lines from FILE containing S, and return them as a list."
-  (->> (cangjie--grep file s)
-       s-trim
-       (s-split "\n")))
+  (with-temp-buffer
+    (insert-file-contents file)
+    (cangjie--grep-buffer (current-buffer) s)))
 
 (defun cangjie--file-contains? (file s)
   "Does FILE contain S?"
-  (not (s-equals? "" (shell-command-to-string (concat "grep " s " " file)))))
+  (not (not (cangjie--grep-file file s))))
 
 (defun cangjie--valid-rime-dict? (val)
   "Check if VAL is a path to a valid RIME dictionary."
@@ -96,14 +98,6 @@ Grab lines from FILE containing S."
          (s-split "")
          (--map (gethash it h))
          (s-join ""))))
-
-(defun cangjie--grep-buffer (buffer s)
-  "Return lines in BUFFER matching S as a list."
-  (with-current-buffer buffer
-    (search-forward s)
-    (let ((line-start (progn (beginning-of-line) (point)))
-          (line-end (progn (end-of-line) (point))))
-      (buffer-substring-no-properties line-start line-end))))
 
 ;;;###autoload
 (defun cangjie (character)
@@ -129,7 +123,7 @@ Grab lines from FILE containing S."
 
                ((cangjie--valid-rime-dict? cangjie-source)
                 ;; take cangjie encoding from RIME dictionary
-                (->> (cangjie--grep-line cangjie-source character)
+                (->> (cangjie--grep-file cangjie-source character)
                      (--filter (not (s-prefix? "#" it)))
                      (s-join "")
                      (s-split "\t")
