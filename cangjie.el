@@ -2,7 +2,7 @@
 
 ;; Authors: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; URL: https://github.com/kisaragi-hiu/cangjie.el
-;; Version: 0.3.2
+;; Version: 0.3.3
 ;; Package-Requires: ((emacs "24") (s "1.12.0") (dash "2.14.1") (f "0.2.0"))
 ;; Keywords: convenience, writing
 
@@ -84,17 +84,17 @@ Grab lines from FILE containing S."
 (defun cangjie--abc-to-han (abc)
   "Convert alphabetical Cangjie code representation ABC into Han characters."
   (let ((h #s(hash-table
-	      size 52
-	      test equal
-	      data ("a" "日" "b" "月" "c" "金" "d" "木" "e" "水" "f" "火"
-		    "g" "土" "h" "竹" "i" "戈" "j" "十" "k" "大" "l" "中"
-		    "m" "一" "n" "弓" "o" "人" "p" "心" "q" "手" "r" "口"
-		    "s" "尸" "t" "廿" "u" "山" "v" "女" "w" "田" "x" "難"
-		    "y" "卜" "z" "重"))))
+              size 52
+              test equal
+              data ("a" "日" "b" "月" "c" "金" "d" "木" "e" "水" "f" "火"
+                    "g" "土" "h" "竹" "i" "戈" "j" "十" "k" "大" "l" "中"
+                    "m" "一" "n" "弓" "o" "人" "p" "心" "q" "手" "r" "口"
+                    "s" "尸" "t" "廿" "u" "山" "v" "女" "w" "田" "x" "難"
+                    "y" "卜" "z" "重"))))
     (->> (downcase abc)
-	 (s-split "")
-	 (--map (gethash it cangjie--abc-to-han-hash))
-	 (s-join ""))))
+         (s-split "")
+         (--map (gethash it h))
+         (s-join ""))))
 
 ;;;###autoload
 (defun cangjie (character)
