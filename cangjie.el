@@ -2,7 +2,7 @@
 
 ;; Authors: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; URL: https://github.com/kisaragi-hiu/cangjie.el
-;; Version: 0.4.0
+;; Version: 0.4.1
 ;; Package-Requires: ((emacs "24") (s "1.12.0") (dash "2.14.1") (f "0.2.0"))
 ;; Keywords: convenience, writing
 
@@ -103,10 +103,10 @@ Grab lines from FILE containing S."
   (when (characterp character)
     (setq character (char-to-string character)))
   (unless (stringp character)
-    (error "Cangjie: %s not a string or character" character))
+    (error "%s not a string or character" character))
   (unless (eq (aref char-script-table (string-to-char character))
               'han)
-    (error "Cangjie: \"%s\" is not a han character" character))
+    (error "\"%s\" is not a han character" character))
   (let ((result
          (cond ((eq cangjie-source 'rime)
                 (let ((downloaded-rime-dict-path (f-join user-emacs-directory "cangjie5.dict.yaml")))
