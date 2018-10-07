@@ -15,8 +15,8 @@ Or use [`straight.el`](https://github.com/raxod502/straight.el):
 
 ## Use
 
-`cangjie-at-point`: Lookup Cangjie encoding for character at point.
-`cangjie (CHARACTER)`: Lookup Cangjie encoding for CHARACTER (asked in prompt when called interactively).
+- `cangjie-at-point`: Lookup Cangjie encoding for character at point.
+- `cangjie (CHARACTER)`: Lookup Cangjie encoding for CHARACTER (asked in prompt when called interactively).
 
 ## Customize
 
