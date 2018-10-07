@@ -2,7 +2,7 @@
 
 ;; Authors: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; URL: https://github.com/kisaragi-hiu/cangjie.el
-;; Version: 0.3.3
+;; Version: 0.4.0
 ;; Package-Requires: ((emacs "24") (s "1.12.0") (dash "2.14.1") (f "0.2.0"))
 ;; Keywords: convenience, writing
 
@@ -100,6 +100,13 @@ Grab lines from FILE containing S."
 (defun cangjie (character)
   "Retrieve Cangjie code for the han CHARACTER."
   (interactive "M漢字：")
+  (when (characterp character)
+    (setq character (char-to-string character)))
+  (unless (stringp character)
+    (error "Cangjie: %s not a string or character" character))
+  (unless (eq (aref char-script-table (string-to-char character))
+              'han)
+    (error "Cangjie: \"%s\" is not a han character" character))
   (let ((result
          (cond ((eq cangjie-source 'rime)
                 (let ((downloaded-rime-dict-path (f-join user-emacs-directory "cangjie5.dict.yaml")))
