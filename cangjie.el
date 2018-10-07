@@ -2,7 +2,7 @@
 
 ;; Authors: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; URL: https://github.com/kisaragi-hiu/cangjie.el
-;; Version: 0.4.2
+;; Version: 0.4.3
 ;; Package-Requires: ((emacs "24") (s "1.12.0") (dash "2.14.1") (f "0.2.0"))
 ;; Keywords: convenience, writing
 
@@ -31,6 +31,7 @@
 (require 's)
 (require 'f)
 (require 'dash)
+(require 'url)
 
 (defgroup cangjie nil
   "Lookup Cangjie code from a RIME dictionary or Wiktionary."
@@ -113,12 +114,9 @@ Grab lines from FILE containing S."
                   (if (cangjie--valid-rime-dict? cangjie-source)
                       (cangjie character)
                     ;; download the dictionary when it's not there
-                    (shell-command-to-string
-                     (concat
-                      "curl --silent "
-                      "https://raw.githubusercontent.com/rime/rime-cangjie/master/cangjie5.dict.yaml"
-                      " > "
-                      cangjie-source))
+                    (url-copy-file
+                     "https://raw.githubusercontent.com/rime/rime-cangjie/master/cangjie5.dict.yaml"
+                     cangjie-source)
                     (cangjie character))))
 
                ((cangjie--valid-rime-dict? cangjie-source)
