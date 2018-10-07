@@ -2,7 +2,7 @@
 
 ;; Authors: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; URL: https://github.com/kisaragi-hiu/cangjie.el
-;; Version: 0.4.1
+;; Version: 0.4.2
 ;; Package-Requires: ((emacs "24") (s "1.12.0") (dash "2.14.1") (f "0.2.0"))
 ;; Keywords: convenience, writing
 
@@ -109,20 +109,17 @@ Grab lines from FILE containing S."
     (error "\"%s\" is not a han character" character))
   (let ((result
          (cond ((eq cangjie-source 'rime)
-                (let ((downloaded-rime-dict-path (f-join user-emacs-directory "cangjie5.dict.yaml")))
-                  (if (cangjie--valid-rime-dict? downloaded-rime-dict-path)
-                      (let ((cangjie-source downloaded-rime-dict-path))
-                        ;; this binding should be available in here
-                        (cangjie character))
+                (let ((cangjie-source (f-join user-emacs-directory "cangjie5.dict.yaml")))
+                  (if (cangjie--valid-rime-dict? cangjie-source)
+                      (cangjie character)
                     ;; download the dictionary when it's not there
                     (shell-command-to-string
                      (concat
                       "curl --silent "
                       "https://raw.githubusercontent.com/rime/rime-cangjie/master/cangjie5.dict.yaml"
                       " > "
-                      downloaded-rime-dict-path))
-                    (let ((cangjie-source downloaded-rime-dict-path))
-                      (cangjie character)))))
+                      cangjie-source))
+                    (cangjie character))))
 
                ((cangjie--valid-rime-dict? cangjie-source)
                 ;; take cangjie encoding from RIME dictionary
