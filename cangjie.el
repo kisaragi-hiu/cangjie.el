@@ -2,7 +2,7 @@
 
 ;; Authors: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; URL: https://github.com/kisaragi-hiu/cangjie.el
-;; Version: 0.5.0
+;; Version: 0.5.1
 ;; Package-Requires: ((emacs "24") (s "1.12.0") (dash "2.14.1") (f "0.2.0"))
 ;; Keywords: convenience, writing
 
@@ -60,11 +60,16 @@ Set to `rime' by default, so the dictionary will be downloaded on first use.")
 
 (defun cangjie--grep-buffer (buffer s)
   "Return lines in BUFFER matching S as a list."
-  (with-current-buffer buffer
-    (search-forward s)
-    (let ((line-start (progn (beginning-of-line) (point)))
-          (line-end (progn (end-of-line) (point))))
-      (buffer-substring-no-properties line-start line-end))))
+  (let (results)
+    (with-current-buffer buffer
+      (goto-char 0)
+      (while (search-forward s nil t)
+        (setq results
+              (cons (buffer-substring-no-properties
+                     (progn (beginning-of-line) (point))
+                     (progn (end-of-line) (point)))
+                    results))))
+    results))
 
 (defun cangjie--grep-file (file s)
   "Grab lines from FILE containing S, and return them as a list."
