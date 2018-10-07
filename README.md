@@ -1,6 +1,6 @@
 # cangjie.el
 
-`cangjie.el` provides one simple function to lookup the [Cangjie encoding](https://en.wikipedia.org/wiki/Cangjie_input_method) for a given [Han character](https://en.wikipedia.org/wiki/Chinese_characters).
+Lookup the [Cangjie encoding](https://en.wikipedia.org/wiki/Cangjie_input_method) for a given [Han character](https://en.wikipedia.org/wiki/Chinese_characters).
 
 ## Install
 
@@ -15,10 +15,8 @@ Or use [`straight.el`](https://github.com/raxod502/straight.el):
 
 ## Use
 
-Do <kbd>M-x</kbd> `cangjie`, then enter the Han character in the prompt.
-The result will be `message`d out.
-
-When called non-interactively, take the character as the argument, and return the Cangjie code.
+`cangjie-at-point`: Lookup Cangjie encoding for character at point.
+`cangjie (CHARACTER)`: Lookup Cangjie encoding for CHARACTER (asked in prompt when called interactively).
 
 ## Customize
 
