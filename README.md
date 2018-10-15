@@ -1,17 +1,28 @@
 # cangjie.el
+[![License: GPL v3+](https://img.shields.io/badge/License-GPL%20v3+-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![MELPA](https://melpa.org/packages/cangjie-badge.svg)](https://melpa.org/#/cangjie)
 
 Lookup the [Cangjie encoding](https://en.wikipedia.org/wiki/Cangjie_input_method) for a given [Han character](https://en.wikipedia.org/wiki/Chinese_characters).
 
 ## Install
 
-Put `cangjie.el` under your `load-path`, then `(require 'cangjie)` in your init file.
+`cangjie.el` is available on MELPA.
 
-Or use [`straight.el`](https://github.com/raxod502/straight.el):
+### `use-package`
 
 ```elisp
-(straight-use-package '(cangjie.el :type git :host github
-                                   :repo "kisaragi-hiu/cangjie.el"))
+(use-package cangjie)
 ```
+
+### [`straight.el`](https://github.com/raxod502/straight.el)
+
+```elisp
+(straight-use-package 'cangjie)
+```
+
+### Manually
+
+Put `cangjie.el` under your `load-path`, then `(require 'cangjie)` in your init file.
 
 ## Use
 

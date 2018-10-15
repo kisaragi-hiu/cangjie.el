@@ -24,7 +24,7 @@
 
 ;;; Commentary:
 
-;; This package is for quick retrieval of Cangjie codes of Han characters.
+;; Lookup the Cangjie encoding for a given Han character.
 
 ;;; Code:
 
@@ -50,7 +50,7 @@ Its value can be:
   to download the dictionary from URL `https://github.com/rime/rime-cangjie',
   and save it for future use.
 - `wiktionary-raw',
-  to do a simple `curl wiktionary.org/wiki/char | grep`.
+  to output the line with the Cangjie code on the character's Wiktionary page,
 - `wiktionary', or anything else,
   to grep the Wiktionary page like `wiktionary-raw', then try to remove the
   markup in the result, leaving just the Cangjie code.
