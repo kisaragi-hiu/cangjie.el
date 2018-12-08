@@ -2,7 +2,7 @@
 
 ;; Authors: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; URL: https://github.com/kisaragi-hiu/cangjie.el
-;; Version: 0.5.1
+;; Version: 0.5.2
 ;; Package-Requires: ((emacs "24") (s "1.12.0") (dash "2.14.1") (f "0.2.0"))
 ;; Keywords: convenience, writing
 
@@ -38,8 +38,7 @@
   :group 'convenience
   :prefix "cangjie-")
 
-;; TODO: I don't know how to use defcustom for this one….
-(defvar cangjie-source 'rime
+(defcustom cangjie-source 'rime
   "RIME dictionary to lookup the character's code in.
 
 Its value can be:
@@ -55,7 +54,12 @@ Its value can be:
   to grep the Wiktionary page like `wiktionary-raw', then try to remove the
   markup in the result, leaving just the Cangjie code.
 
-Set to `rime' by default, so the dictionary will be downloaded on first use.")
+Set to `rime' by default, so the dictionary will be downloaded on first use."
+  :group 'cangjie
+  :type '(choice file
+                 (symbol :tag "'rime" :value rime)
+                 (symbol :tag "'wiktionary-raw" :value wiktionary-raw)
+                 (symbol :tag "'wiktionary" :value wiktionary)))
 
 
 (defun cangjie--grep-buffer (buffer s)
