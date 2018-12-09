@@ -2,7 +2,7 @@
 
 ;; Authors: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; URL: https://github.com/kisaragi-hiu/cangjie.el
-;; Version: 0.5.2
+;; Version: 0.5.3
 ;; Package-Requires: ((emacs "24") (s "1.12.0") (dash "2.14.1") (f "0.2.0"))
 ;; Keywords: convenience, writing
 
@@ -57,9 +57,9 @@ Its value can be:
 Set to `rime' by default, so the dictionary will be downloaded on first use."
   :group 'cangjie
   :type '(choice file
-                 (symbol :tag "'rime" :value rime)
-                 (symbol :tag "'wiktionary-raw" :value wiktionary-raw)
-                 (symbol :tag "'wiktionary" :value wiktionary)))
+                 (const :tag "'rime" rime)
+                 (const :tag "'wiktionary-raw" wiktionary-raw)
+                 (const :tag "'wiktionary" wiktionary)))
 
 
 (defun cangjie--grep-buffer (buffer s)
