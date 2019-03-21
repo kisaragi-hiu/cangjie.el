@@ -33,6 +33,7 @@
 (require 'dash)
 (require 'url)
 (require 'subr-x)
+(require 'cl-lib)
 
 (defgroup cangjie nil
   "Lookup Cangjie code from a RIME dictionary or Wiktionary."
@@ -124,16 +125,17 @@ that isn't `han'.)"
     abc))
 
 ;;;###autoload
-(defun cangjie (character)
+(cl-defun cangjie (character)
   "Retrieve Cangjie code for the han CHARACTER."
   (interactive "M漢字：")
   (when (characterp character)
     (setq character (char-to-string character)))
   (unless (stringp character)
     (error "%s not a string or character" character))
+  ;; not a han character
   (unless (eq (aref char-script-table (string-to-char character))
               'han)
-    (error "\"%s\" is not a han character" character))
+    (cl-return nil))
   (let ((result
          (cond ((eq cangjie-source 'rime)
                 (let ((cangjie-source (f-join user-emacs-directory "cangjie5.dict.yaml")))
