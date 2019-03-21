@@ -2,7 +2,7 @@
 
 ;; Authors: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; URL: https://github.com/kisaragi-hiu/cangjie.el
-;; Version: 0.6.0
+;; Version: 0.7.0
 ;; Package-Requires: ((emacs "24.4") (s "1.12.0") (dash "2.14.1") (f "0.2.0"))
 ;; Keywords: convenience, writing
 
@@ -63,14 +63,16 @@ Set to `rime' by default, so the dictionary will be downloaded on first use."
                  (const :tag "'wiktionary-raw" wiktionary-raw)
                  (const :tag "'wiktionary" wiktionary)))
 
-(defcustom cangjie-format 'han
-  "Format to return Cangjie code in.
+(defcustom cangjie-display-format 'han
+  "Format to display Cangjie code in.
 
-`han' means the Han character representation \(弓木), and `abc'
-means the alphabetical representation \(nd)."
+- `han' means the Han character representation \(弓木)
+- `abc' means the alphabetical representation \(nd)
+- `combined' means a combined format that looks like \"弓木 \(nd)\""
   :group 'cangjie
   :type '(choice (const :tag "Han character" han)
-                 (const :tag "Alphabet" 'abc)))
+                 (const :tag "Alphabet" 'abc)
+                 (const :tag "Combined" 'combined)))
 
 
 (defun cangjie--grep-buffer (buffer s)
@@ -104,25 +106,35 @@ means the alphabetical representation \(nd)."
        (cangjie--file-contains? val "name:")
        (cangjie--file-contains? val "use_preset_vocabulary:")))
 
-(defun cangjie--abc-to-han (abc)
-  "Convert alphabetical Cangjie code representation ABC into Han characters.
+(defvar cangjie--abc-han-alist
+  '(("a" . "日") ("b" . "月") ("c" . "金") ("d" . "木") ("e" . "水") ("f" . "火")
+    ("g" . "土") ("h" . "竹") ("i" . "戈") ("j" . "十") ("k" . "大") ("l" . "中")
+    ("m" . "一") ("n" . "弓") ("o" . "人") ("p" . "心") ("q" . "手") ("r" . "口")
+    ("s" . "尸") ("t" . "廿") ("u" . "山") ("v" . "女") ("w" . "田") ("x" . "難")
+    ("y" . "卜") ("z" . "重"))
+  "Alist mapping alphabetical Cangjie code to Han characters.")
 
-Return ABC unchanged if `cangjie-format' is `abc' \(or anything
-that isn't `han'.)"
-  (if (eq cangjie-format 'han)
-      (let ((h #s(hash-table
-                  size 52
-                  test equal
-                  data ("a" "日" "b" "月" "c" "金" "d" "木" "e" "水" "f" "火"
-                        "g" "土" "h" "竹" "i" "戈" "j" "十" "k" "大" "l" "中"
-                        "m" "一" "n" "弓" "o" "人" "p" "心" "q" "手" "r" "口"
-                        "s" "尸" "t" "廿" "u" "山" "v" "女" "w" "田" "x" "難"
-                        "y" "卜" "z" "重"))))
-        (->> (downcase abc)
-             (s-split "")
-             (--map (gethash it h))
-             (s-join "")))
-    abc))
+(defun cangjie--abc-to-han (abc)
+  "Convert alphabetical Cangjie code representation ABC into Han characters."
+  (->> (downcase abc)
+       (s-split "")
+       (--map (cdr (assoc it cangjie--abc-han-alist)))
+       (s-join "")))
+
+(defun cangjie--han-to-abc (han)
+  "Convert Han character Cangjie code representation HAN into alphabets."
+  (->> (s-split "" han)
+       (--map (car (rassoc it cangjie--abc-han-alist)))
+       (s-join "")))
+
+(defun cangjie--echo (code)
+  "Echo CODE into the echo area, applying `cangjie-display-format'.
+
+Assumes that CODE is in HAN character format."
+  (case cangjie-display-format
+    ('han (message "%s" code))
+    ('combined (message "%s (%s)" code (cangjie--han-to-abc code)))
+    (t (message "%s" (cangjie--han-to-abc code)))))
 
 ;;;###autoload
 (cl-defun cangjie (character)
@@ -177,7 +189,7 @@ that isn't `han'.)"
                  cangjie--abc-to-han)))))
 
     (when (called-interactively-p 'interactive)
-      (message result))
+      (cangjie--echo result))
     result))
 
 ;;;###autoload
@@ -187,7 +199,7 @@ that isn't `han'.)"
   (when-let* ((char (char-after))
               (result (cangjie (string char))))
     (when (called-interactively-p 'interactive)
-      (message result))
+      (cangjie--echo result))
     result))
 
 (defun cangjie--at-point-in-buf (buf)
@@ -196,7 +208,7 @@ that isn't `han'.)"
   (let ((current-point (point)))
     (with-current-buffer buf
       (setf (point) current-point)
-      (message (cangjie-at-point)))))
+      (cangjie--echo (cangjie-at-point)))))
 
 ;;;###autoload
 (defun cangjie-practice ()
