@@ -119,15 +119,9 @@ means the alphabetical representation \(nd)."
          (s-join ""))))
 
 ;;;###autoload
-(defun cangjie (character &optional return-han)
-  "Retrieve Cangjie code for the han CHARACTER.
-
-If RETURN-HAN is non-nil, return the code using Han character
-form \(eg. 弓木). Otherwise, use the alphabetical representation
-\(eg. \"nd\")."
-  (interactive
-   (list (read-string "漢字：")
-         (eq cangjie-format 'han)))
+(defun cangjie (character)
+  "Retrieve Cangjie code for the han CHARACTER."
+  (interactive "M漢字：")
   (when (characterp character)
     (setq character (char-to-string character)))
   (unless (stringp character)
@@ -148,14 +142,12 @@ form \(eg. 弓木). Otherwise, use the alphabetical representation
 
                ((cangjie--valid-rime-dict? cangjie-source)
                 ;; take cangjie encoding from RIME dictionary
-                (--> (cangjie--grep-file cangjie-source character)
-                     (--filter (not (s-prefix? "#" it)) it)
-                     (s-join "" it)
-                     (s-split "\t" it)
+                (->> (cangjie--grep-file cangjie-source character)
+                     (--filter (not (s-prefix? "#" it)))
+                     (s-join "")
+                     (s-split "\t")
                      second
-                     (if return-han
-                         (cangjie--abc-to-han it)
-                       it)))
+                     cangjie--abc-to-han))
 
                ((eq cangjie-source 'wiktionary-raw)
                 (cangjie--grep-buffer (url-retrieve-synchronously
@@ -165,17 +157,15 @@ form \(eg. 弓木). Otherwise, use the alphabetical representation
 
                (t
                 ;; Try to extract encoding from grep'd wiktionary text
-                (-->
+                (->>
                  (cangjie--grep-buffer (url-retrieve-synchronously
                                         (concat "https://zh.wiktionary.org/wiki/"
                                                 character))
                                        "仓颉")
-                 (s-replace-regexp "^.*：" "" it)
+                 (s-replace-regexp "^.*：" "")
                  s-trim
-                 (s-replace-regexp "<.*>$" "" it)
-                 (if return-han
-                     (cangjie--abc-to-han it)
-                   it))))))
+                 (s-replace-regexp "<.*>$" "")
+                 cangjie--abc-to-han)))))
 
     (when (called-interactively-p 'interactive)
       (message result))
