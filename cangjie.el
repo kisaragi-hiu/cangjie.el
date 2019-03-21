@@ -127,10 +127,12 @@ Set to `rime' by default, so the dictionary will be downloaded on first use."
        (--map (car (rassoc it cangjie--abc-han-alist)))
        (s-join "")))
 
-(defun cangjie--echo (code)
+(cl-defun cangjie--echo (code)
   "Echo CODE into the echo area, applying `cangjie-display-format'.
 
 Assumes that CODE is in HAN character format."
+  (unless code
+    (cl-return-from cangjie--echo nil))
   (case cangjie-display-format
     ('han (message "%s" code))
     ('combined (message "%s (%s)" code (cangjie--han-to-abc code)))
