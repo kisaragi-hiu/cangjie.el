@@ -149,7 +149,7 @@ that isn't `han'.)"
                 ;; take cangjie encoding from RIME dictionary
                 (->> (cangjie--grep-file cangjie-source character)
                      (--filter (not (s-prefix? "#" it)))
-                     (s-join "")
+                     first
                      (s-split "\t")
                      second
                      cangjie--abc-to-han))
