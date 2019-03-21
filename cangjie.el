@@ -149,6 +149,8 @@ that isn't `han'.)"
                 ;; take cangjie encoding from RIME dictionary
                 (->> (cangjie--grep-file cangjie-source character)
                      (--filter (not (s-prefix? "#" it)))
+                     ;; if there are multiple, grab the shortest
+                     (--sort (< (length it) (length other)))
                      first
                      (s-split "\t")
                      second
