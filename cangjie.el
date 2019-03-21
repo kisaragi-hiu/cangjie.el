@@ -62,6 +62,15 @@ Set to `rime' by default, so the dictionary will be downloaded on first use."
                  (const :tag "'wiktionary-raw" wiktionary-raw)
                  (const :tag "'wiktionary" wiktionary)))
 
+(defcustom cangjie-format 'han
+  "Format to return Cangjie code in.
+
+`han' means the Han character representation \(弓木), and `abc'
+means the alphabetical representation \(nd)."
+  :group 'cangjie
+  :type '(choice (const :tag "Han character" han)
+                 (const :tag "Alphabet" 'abc)))
+
 
 (defun cangjie--grep-buffer (buffer s)
   "Return lines in BUFFER matching S as a list."
