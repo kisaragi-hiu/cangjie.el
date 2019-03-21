@@ -135,7 +135,7 @@ that isn't `han'.)"
   ;; not a han character
   (unless (eq (aref char-script-table (string-to-char character))
               'han)
-    (cl-return nil))
+    (cl-return-from cangjie nil))
   (let ((result
          (cond ((eq cangjie-source 'rime)
                 (let ((cangjie-source (f-join user-emacs-directory "cangjie5.dict.yaml")))
