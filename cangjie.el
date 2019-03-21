@@ -32,6 +32,7 @@
 (require 'f)
 (require 'dash)
 (require 'url)
+(require 'subr-x)
 
 (defgroup cangjie nil
   "Lookup Cangjie code from a RIME dictionary or Wiktionary."
@@ -165,8 +166,8 @@ Set to `rime' by default, so the dictionary will be downloaded on first use."
 (defun cangjie-at-point ()
   "Run `cangjie' at point."
   (interactive)
-  (let ((result
-         (cangjie (string (char-after)))))
+  (when-let* ((char (char-after))
+              (result (cangjie (string char))))
     (when (called-interactively-p 'interactive)
       (message result))
     result))
