@@ -2,7 +2,7 @@
 
 ;; Authors: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; URL: https://github.com/kisaragi-hiu/cangjie.el
-;; Version: 0.7.1
+;; Version: 0.7.2
 ;; Package-Requires: ((emacs "24.4") (s "1.12.0") (dash "2.14.1") (f "0.2.0"))
 ;; Keywords: convenience, writing
 
@@ -134,8 +134,8 @@ Assumes that CODE is in HAN character format."
   (unless code
     (cl-return-from cangjie--echo nil))
   (case cangjie-display-format
-    ('han (message "%s" code))
-    ('combined (message "%s (%s)" code (cangjie--han-to-abc code)))
+    (han (message "%s" code))
+    (combined (message "%s (%s)" code (cangjie--han-to-abc code)))
     (t (message "%s" (cangjie--han-to-abc code)))))
 
 ;;;###autoload
