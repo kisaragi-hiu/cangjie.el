@@ -30,8 +30,6 @@
 (require 'cangjie)
 (require 'dash)
 
-(defvar cangjie-practice--format-values)
-
 (defun cangjie-practice-cycle-format ()
   "Cycle `cangjie-format'."
   (interactive)
