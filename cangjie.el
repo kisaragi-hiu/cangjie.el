@@ -1,4 +1,4 @@
-;;; cangjie.el --- retrieve cangjie code for han characters  -*- lexical-binding: t; -*-
+;;; cangjie.el --- Retrieve cangjie code for han characters  -*- lexical-binding: t; -*-
 
 ;; Authors: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; URL: https://github.com/kisaragi-hiu/cangjie.el
@@ -71,8 +71,8 @@ Set to `rime' by default, so the dictionary will be downloaded on first use."
 - `combined' means a combined format that looks like \"弓木 \(nd)\""
   :group 'cangjie
   :type '(choice (const :tag "Han character" han)
-                 (const :tag "Alphabet" 'abc)
-                 (const :tag "Combined" 'combined)))
+                 (const :tag "Alphabet" abc)
+                 (const :tag "Combined" combined)))
 
 
 (defun cangjie--grep-buffer (buffer s)
@@ -227,7 +227,6 @@ the way it's displayed."
   (interactive)
   (delete-other-windows)
   (let ((text-buf (current-buffer))
-        ;; this will change current-buffer
         (practice-buf (pop-to-buffer (get-buffer-create "*Cangjie Practice*"))))
     (with-current-buffer practice-buf
       (delete-region (point-min) (point-max))
