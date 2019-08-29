@@ -212,29 +212,5 @@ Assumes that CODE is in HAN character format."
       (setf (point) current-point)
       (cangjie--echo (cangjie-at-point)))))
 
-;;;###autoload
-(defun cangjie-practice ()
-  "Start a Cangjie practicing session.
-
-Should be run in a buffer containing the text to practice.
-
-This will discard the current window layout; launch in a new
-frame if you don't want that to happen.
-
-The Cangjie code for the next character to type will be displayed
-in the echo area while you type. Use `cangjie-format' to control
-the way it's displayed."
-  (interactive)
-  (delete-other-windows)
-  (let ((text-buf (current-buffer))
-        (practice-buf (pop-to-buffer (get-buffer-create "*Cangjie Practice*"))))
-    (with-current-buffer practice-buf
-      (delete-region (point-min) (point-max))
-      (add-hook 'post-command-hook
-                ;; Since this is local, I reckon it's fine to not name this.
-                (lambda () (cangjie--at-point-in-buf text-buf))
-                nil
-                :local))))
-
 (provide 'cangjie)
 ;;; cangjie.el ends here
