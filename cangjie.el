@@ -198,11 +198,12 @@ Assumes that CODE is in HAN character format."
 (defun cangjie-at-point ()
   "Run `cangjie' at point."
   (interactive)
-  (when-let* ((char (char-after))
-              (result (cangjie (string char))))
-    (when (called-interactively-p 'interactive)
-      (cangjie--echo result))
-    result))
+  (let* ((char (char-after))
+         (result (cangjie (string char))))
+    (when (and char result)
+      (when (called-interactively-p 'interactive)
+        (cangjie--echo result))
+      result)))
 
 (defun cangjie--at-point-in-buf (buf)
   "Return Cangjie code for character at current point in BUF."
