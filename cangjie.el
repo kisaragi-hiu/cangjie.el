@@ -195,14 +195,18 @@ Assumes that CODE is in HAN character format."
     result))
 
 ;;;###autoload
-(defun cangjie-at-point ()
-  "Run `cangjie' at point."
-  (interactive)
+(defun cangjie-at-point (&optional arg)
+  "Run `cangjie' at point.
+
+With a prefix ARG, insert the result."
+  (interactive "P")
   (let* ((char (char-after))
          (result (cangjie (string char))))
     (when (and char result)
       (when (called-interactively-p 'interactive)
         (cangjie--echo result))
+      (when arg
+        (insert result))
       result)))
 
 (defun cangjie--at-point-in-buf (buf)
