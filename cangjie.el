@@ -167,9 +167,9 @@ Assumes that CODE is in HAN character format."
                      (--filter (not (s-prefix? "#" it)))
                      ;; if there are multiple, grab the shortest
                      (--sort (< (length it) (length other)))
-                     first
+                     cl-first
                      (s-split "\t")
-                     second
+                     cl-second
                      cangjie--abc-to-han))
 
                ((eq cangjie-source 'wiktionary-raw)
