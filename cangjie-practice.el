@@ -22,65 +22,160 @@
 
 ;;; Commentary:
 
-;; Practice Cangjie by typing articles of your choosing with Cangjie
-;; code prompted in the echo area.
+;; A Cangjie typing practice mode.
 
 ;;; Code:
 
 (require 'cangjie)
 (require 'dash)
+(require 's)
 
-(defun cangjie-practice-cycle-format ()
-  "Cycle `cangjie-format'."
-  (interactive)
-  (let* ((value-pairs (->> (cdr (get 'cangjie-display-format 'custom-type))
-                           (--map (cons (car (last it))
-                                        (plist-get (cdr it) :tag)))))
-         (vals (-map #'car value-pairs))
-         (val-names (-map #'cdr value-pairs))
-         (position (or (cl-position cangjie-display-format vals) 0))
-         (new-position (mod (1+ position) (length value-pairs)))
-         (new-value (elt vals new-position))
-         (new-name (elt val-names new-position)))
-    (setq cangjie-display-format new-value)
-    (message "Cangjie display format: %s" new-name)))
+(defun cangjie-practice--trim (string)
+  "Trim STRING, treating IDEOGRAPHIC SPACE (　) as a whitespace as well."
+  (string-trim string "[ \t\n\r　]+" "[ \t\n\r　]+"))
 
-(define-derived-mode cangjie-practice-mode text-mode "Cangjie-Practice"
-  "Cangjie Practice mode.
+(defvar-local cangjie-practice--state nil)
 
-Do not start this major mode directly; use `cangjie-practice'
-instead."
-  (unless (eq this-command 'cangjie-practice)
-    (error "Use cangjie-practice instead of starting this mode directly"))
-  (define-key cangjie-practice-mode-map
-    (kbd "C-c C-c") #'cangjie-practice-cycle-format))
+(defmacro cangjie-practice--state (key)
+  "Access KEY in `cangjie-practice--state'."
+  `(map-elt cangjie-practice--state ,key))
+
+(defun cangjie-practice--state-current-line ()
+  "Return current line as a string."
+  (elt (cangjie-practice--state :lines)
+       (cangjie-practice--state :line-index)))
+
+(defun cangjie-practice--state-current-char ()
+  "Return current char as a string."
+  (condition-case _
+      (-some-> (cangjie-practice--state-current-line)
+        (elt (cangjie-practice--state :char-index))
+        string)
+    (args-out-of-range nil)))
+
+(defun cangjie-practice--load-file (file)
+  "Load FILE."
+  (setf
+   (cangjie-practice--state :line-index) 0
+   (cangjie-practice--state :char-index) 0
+   (cangjie-practice--state :file-name) file
+   (cangjie-practice--state :lines)
+   (->> (f-read-text file)
+     s-trim
+     (s-split "\n"))))
+
+(cl-defun cangjie-practice--increment-line (&optional (n 1))
+  "Increment `:line-index', skipping through empty lines.
+
+Also resets `:char-index' to 0.
+
+If N is non-nil, increment N lines at a time. A value of -1 can
+be used for decrementing."
+  (cl-incf (cangjie-practice--state :line-index) n)
+  (setf (cangjie-practice--state :char-index) 0)
+  (while (s-matches? "^[ \t\n\r　]*$" (cangjie-practice--state-current-line))
+    (cl-incf (cangjie-practice--state :line-index) n)))
+
+(cl-defun cangjie-practice--increment-char (&optional (n 1))
+  "Increment `:char-index', skipping through non-han characters.
+
+If we finish a line, continue onto the next line.
+
+If N is non-nil, increment N characters at a time. A value of -1
+can be used for decrementing."
+  (cl-incf (cangjie-practice--state :char-index) n)
+  (cl-block nil
+    (while t
+      (cond
+       ((not (cangjie-practice--state-current-char))
+        (cangjie-practice--increment-line))
+       ((cangjie (cangjie-practice--state-current-char))
+        (cl-return))
+       (t
+        (cl-incf (cangjie-practice--state :char-index) n))))))
+
+(defmacro cangjie-practice--widget (name &rest body)
+  "Set up widget content update for NAME and run BODY."
+  (declare (indent 1))
+  (let ((start-key (intern (concat ":" name "-start")))
+        (end-key (intern (concat ":" name "-end"))))
+    `(save-excursion
+       (-when-let* ((start (cangjie-practice--state ,start-key))
+                    (end (cangjie-practice--state ,end-key)))
+         (goto-char start)
+         (delete-region start end))
+       (setf (cangjie-practice--state ,start-key) (point))
+       ,@body
+       (setf (cangjie-practice--state ,end-key) (point))
+       (- (cangjie-practice--state ,end-key) (cangjie-practice--state ,start-key)))))
+
+(defun cangjie-practice--widget-current-char ()
+  "Insert the current character and its Cangjie code."
+  (let ((character (cangjie-practice--state-current-char)))
+    (insert character "\n\n"
+            (cangjie character) "\n"
+            (cangjie--han-to-abc
+             (cangjie character))
+            "\n\n")))
+
+(defun cangjie-practice--widget-current-line ()
+  "Insert the current line."
+  (cangjie-practice--widget "current-line"
+    (insert (cangjie-practice--trim (cangjie-practice--state-current-line))
+            "\n\n")
+    (cangjie-practice--widget-current-char)))
+
+(defun cangjie-practice--widget-input-area ()
+  "."
+  (insert "練習區域\n\n"))
+
+
+(cl-defun cangjie-practice--post-command ()
+  "Post-command hook."
+  (unless (eq this-command #'self-insert-command)
+    (cl-return-from cangjie-practice--post-command))
+  (let ((inserted-char (string last-command-event)))
+    (when (equal (cangjie-practice--state-current-char) inserted-char)
+      (cangjie-practice--increment-char)
+      (cangjie-practice--widget-current-line))))
+
+(defun cangjie-practice--view-init ()
+  "."
+  (erase-buffer)
+  (setq cangjie-practice--state nil)
+  (insert "倉頡練習\n\n")
+  (insert-text-button
+   "[載入文本]"
+   'follow-link t
+   'action (lambda (&rest _)
+             (and (cangjie-practice--load-file (read-file-name "文本："))
+                  (cangjie-practice--view-loaded)))))
+
+(defun cangjie-practice--view-loaded ()
+  "."
+  (erase-buffer)
+  (insert "倉頡練習：" (map-elt cangjie-practice--state :file-name) " ")
+  (insert-text-button
+   "[載入文本]"
+   'follow-link t
+   'action (lambda (&rest _)
+             (and (cangjie-practice--load-file
+                   (read-file-name "文本："))
+                  (cangjie-practice--view-loaded))))
+  (insert "\n\n")
+  (forward-char (cangjie-practice--widget-current-line))
+  (cangjie-practice--widget-current-char)
+  (cangjie-practice--widget-input-area))
 
 ;;;###autoload
 (defun cangjie-practice ()
-  "Start a Cangjie practice session.)))
-
-Should be run in a buffer containing the text to practice.
-
-This will discard the current window layout; launch in a new
-frame if you don't want that to happen.
-
-The Cangjie code for the next character to type will be displayed
-in the echo area while you type. Use `cangjie-display-format' to control
-the way it's displayed.
-
-\\{cangjie-practice-mode-map}"
+  "Start a Cangjie practice session."
   (interactive)
-  (delete-other-windows)
-  (let ((text-buf (current-buffer))
-        (practice-buf (pop-to-buffer (get-buffer-create "*Cangjie Practice*"))))
-    (with-current-buffer practice-buf
-      (delete-region (point-min) (point-max))
-      (cangjie-practice-mode)
-      (add-hook
-       'post-command-hook
-       (lambda () (cangjie--at-point-in-buf text-buf))
-       nil
-       :local))))
+  (let ((buf (pop-to-buffer-same-window
+              (get-buffer-create "*Cangjie Practice*"))))
+    (with-current-buffer buf
+      (cangjie-practice--view-init)
+      (add-hook 'post-command-hook #'cangjie-practice--post-command nil t))))
 
 (provide 'cangjie-practice)
 
