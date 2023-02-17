@@ -138,6 +138,37 @@ Assumes that CODE is in HAN character format."
     ('combined (message "%s (%s)" code (cangjie--han-to-abc code)))
     (_ (message "%s" (cangjie--han-to-abc code)))))
 
+(defun cangjie-to-han (cangjie &optional insert?)
+  "Convert CANGJIE code to one or more matching Han characters.
+If INSERT? is non-nil, insert the result."
+  (interactive
+   (list (if (region-active-p)
+             (buffer-substring-no-properties (region-beginning)
+                                             (region-end))
+           (read-string "倉頡："))
+         :insert?))
+  (unless (or (eq cangjie-source 'rime)
+              (cangjie--valid-rime-dict? cangjie-source))
+    (error "This function only works when using RIME dictionary"))
+  (unless (stringp cangjie)
+    (error "The input must be a string"))
+  (unless (> (length cangjie) 0)
+    (error "The input must not be empty"))
+  ;; HACK: ensure it's downloaded and available
+  (cangjie "火")
+  (let ((cangjie-source (if (eq cangjie-source 'rime)
+                            (f-join user-emacs-directory "cangjie5.dict.yaml")
+                          cangjie-source))
+        (abc (cangjie--han-to-abc cangjie)))
+    (when (s-blank-str? abc)
+      (error "Input is not a valid Cangjie code"))
+    (let ((result (->> (format "\t%s" abc)
+                       (cangjie--grep-file cangjie-source)
+                       (--map (car (s-split "\t" it))))))
+      (when insert?
+        (insert (s-join "" (reverse result))))
+      result)))
+
 ;;;###autoload
 (cl-defun cangjie (character)
   "Retrieve Cangjie code for the han CHARACTER."
